@@ -14,6 +14,7 @@ import java.util.List;
 
 public class GameUtil {
 
+    public static List<Bitmap> bitmaps = new ArrayList<>();
     public static List<ItemBean> itemBeanList = new ArrayList<>();
 
     public static Bitmap mLastBitmap;
@@ -79,6 +80,50 @@ public class GameUtil {
             inversionCount = 0;
         }
         return inversions;
+    }
+
+    /**
+     * 判断点击item能否移动
+     * @param position
+     * @return
+     */
+    public static boolean isMoveable(int position) {
+        int blankId = GameUtil.mBlankBitmapBean.getItemId() - 1;
+        //相同行相差type
+        if (Math.abs(blankId - position) == PuzzleActivity.TYPE) {
+            return true;
+        } else {
+            //不同行相差1
+            if (Math.abs(blankId - position) == 1) {
+                return true;
+            } else
+                return false;
+        }
+    }
+
+    /**
+     * 判断是否完成
+     * @return
+     */
+    public static boolean isSuccess() {
+        for (ItemBean itemBean : GameUtil.itemBeanList ) {
+            if (itemBean.getItemId() != 0 && itemBean.getItemId() == itemBean.getBitmapId()) {
+                continue;
+            } else if (itemBean.getBitmapId() == 0 && itemBean.getItemId() == PuzzleActivity.TYPE * PuzzleActivity.TYPE) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static void reset() {
+        bitmaps.clear();
+        itemBeanList.clear();
+        mLastBitmap.recycle();
+        mLastBitmap = null;
+        mBlankBitmapBean = null;
     }
 
 }

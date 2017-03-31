@@ -113,9 +113,12 @@ public class MainActivity extends Activity {
     }
 
     private void jumpPuzzleActivity(String imagePath, String imageType) {
-        Intent intent = new Intent(this, null);
+        int type = 3;
+        Intent intent = new Intent(this, PuzzleActivity.class);
         intent.putExtra("imagePath", imagePath);
         intent.putExtra("imageType", imageType);
+        intent.putExtra("type", type);
+        PuzzleActivity.TYPE = type;
         startActivity(intent);
     }
 }

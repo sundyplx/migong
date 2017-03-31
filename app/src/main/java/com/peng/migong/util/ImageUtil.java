@@ -18,7 +18,6 @@ import java.util.List;
 
 public class ImageUtil {
 
-
     /**
      * 初始化小图片和bean类
      *
@@ -26,7 +25,7 @@ public class ImageUtil {
      * @param type
      * @param bitmapSelected
      */
-    public void createInitBitmaps(Context context, int type, Bitmap bitmapSelected) {
+    public static void createInitBitmaps(Context context, int type, Bitmap bitmapSelected) {
 
         Bitmap bitmap = null;
         int itemWidth = bitmapSelected.getWidth() / type;
@@ -44,11 +43,15 @@ public class ImageUtil {
         bitmaps.remove(type * type - 1);
         GameUtil.itemBeanList.remove(type * type - 1);
         Bitmap blankBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.blank);
-        blankBitmap = Bitmap.createBitmap(blankBitmap, 0, 0, itemWidth, itemHeight);
+
+//        itemWidth = Math.min(blankBitmap.getWidth(), itemWidth);
+//        itemHeight = Math.min(blankBitmap.getHeight(), itemHeight);
+//        blankBitmap = Bitmap.createBitmap(blankBitmap, 0, 0, itemWidth, itemHeight);
 
         bitmaps.add(blankBitmap);
         GameUtil.itemBeanList.add(new ItemBean(type * type, 0, blankBitmap));
         GameUtil.mBlankBitmapBean = GameUtil.itemBeanList.get(type * type - 1);
+        GameUtil.bitmaps = bitmaps;
     }
 
     /**
