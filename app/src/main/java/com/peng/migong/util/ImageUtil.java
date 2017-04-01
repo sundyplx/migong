@@ -36,12 +36,12 @@ public class ImageUtil {
                 bitmap = Bitmap.createBitmap(bitmapSelected, (j - 1) * itemWidth, (i - 1) * itemHeight, itemWidth, itemHeight);
                 bitmaps.add(bitmap);
                 ItemBean itembean = new ItemBean((i - 1) * type + j, (i - 1) * type + j, bitmap);
-                GameUtil.itemBeanList.add(itembean);
+                GameUtil.mItemBeans.add(itembean);
             }
         }
         GameUtil.mLastBitmap = bitmaps.get(type * type - 1);
         bitmaps.remove(type * type - 1);
-        GameUtil.itemBeanList.remove(type * type - 1);
+        GameUtil.mItemBeans.remove(type * type - 1);
         Bitmap blankBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.blank);
 
 //        itemWidth = Math.min(blankBitmap.getWidth(), itemWidth);
@@ -49,9 +49,9 @@ public class ImageUtil {
 //        blankBitmap = Bitmap.createBitmap(blankBitmap, 0, 0, itemWidth, itemHeight);
 
         bitmaps.add(blankBitmap);
-        GameUtil.itemBeanList.add(new ItemBean(type * type, 0, blankBitmap));
-        GameUtil.mBlankBitmapBean = GameUtil.itemBeanList.get(type * type - 1);
-        GameUtil.bitmaps = bitmaps;
+        GameUtil.mItemBeans.add(new ItemBean(type * type, 0, blankBitmap));
+        GameUtil.mBlankBitmapBean = GameUtil.mItemBeans.get(type * type - 1);
+        GameUtil.mBitmaps = bitmaps;
     }
 
     /**

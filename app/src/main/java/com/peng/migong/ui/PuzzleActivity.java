@@ -1,28 +1,30 @@
 package com.peng.migong.ui;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.peng.migong.R;
+import com.peng.migong.adapter.PuzzleAdapter;
+import com.peng.migong.bean.ItemBean;
 import com.peng.migong.constants.ImageType;
 import com.peng.migong.util.GameUtil;
 import com.peng.migong.util.ImageUtil;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * 拼图页面
@@ -32,19 +34,20 @@ import java.util.TimerTask;
  */
 public class PuzzleActivity extends Activity {
 
-    public static int TYPE = 3; //3, 4, 5
-    private int mType = 3;
-
-    private TextView timerView, steperView;
+    private TextView steperView;
     private Button artworkBtn, resetBtn, backBtn;
     private GridView gridView;
+    //    private RecyclerView recyclerView;
+    private PuzzleAdapter puzzleAdapter;
+    private ImageView imgViewStub;
+    private MyAdapter myAdapter;
     private Bitmap mBitmap;
 
-    private Timer timer;
-    private TimerTask timerTask;
-    private int timeTotal = 0;
-
     private int stepTotal = 0;
+
+    private boolean isArtworkVisible = false;
+    private ObjectAnimator artworkVisibleAnimator;
+    private ObjectAnimator artworkInvisibleAnimator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,48 +62,49 @@ public class PuzzleActivity extends Activity {
             } else {
                 mBitmap = BitmapFactory.decodeFile(imagePath);
             }
-            mType = bundle.getInt("type");
-            ImageUtil.createInitBitmaps(this, mType, mBitmap);
+            ImageUtil.createInitBitmaps(this, GameUtil.TYPE, mBitmap);
+            GameUtil.getPuzzleGenerator();
         }
         initView();
+        initData();
         setListener();
-        initTimer();
-
     }
 
-    Handler timeHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == 1) {
-                timeTotal++;
-                refreshTime(timeTotal);
-            }
-        }
-    };
-
     private void initView() {
-        timerView = (TextView) findViewById(R.id.tv_timer);
         steperView = (TextView) findViewById(R.id.steper);
         artworkBtn = (Button) findViewById(R.id.artwork);
         resetBtn = (Button) findViewById(R.id.reset);
         backBtn = (Button) findViewById(R.id.back);
+        imgViewStub = (ImageView) findViewById(R.id.artwork_viewstub);
+//        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+//        puzzleAdapter = new PuzzleAdapter(this);
+//        recyclerView.setAdapter(puzzleAdapter);
+
         gridView = (GridView) findViewById(R.id.gridview);
-        gridView.setNumColumns(mType);
-        gridView.setAdapter(new myAdapter());
+        gridView.setNumColumns(GameUtil.TYPE);
+        myAdapter = new MyAdapter();
+        gridView.setAdapter(myAdapter);
     }
 
+    private void initData() {
 
-    private class myAdapter extends BaseAdapter{
+        imgViewStub.setImageBitmap(mBitmap);
+        artworkVisibleAnimator = ObjectAnimator.ofFloat(imgViewStub, "alpha", 0f, 1f);
+        artworkVisibleAnimator.setDuration(500);
+        artworkInvisibleAnimator = ObjectAnimator.ofFloat(imgViewStub, "alpha", 1f, 0f);
+        artworkInvisibleAnimator.setDuration(500);
+    }
+
+    private class MyAdapter extends BaseAdapter {
 
         @Override
         public int getCount() {
-            return GameUtil.bitmaps.size();
+            return GameUtil.mBitmaps.size();
         }
 
         @Override
         public Object getItem(int i) {
-            return GameUtil.bitmaps.get(i);
+            return GameUtil.mBitmaps.get(i);
         }
 
         @Override
@@ -120,16 +124,18 @@ public class PuzzleActivity extends Activity {
                 viewHolder = (ViewHolder) view.getTag();
             }
 
-            viewHolder.imageView.setImageBitmap(GameUtil.bitmaps.get(i));
+            viewHolder.imageView.setImageBitmap(GameUtil.mItemBeans.get(i).getBitmap());
+            Log.e("test", "position: " + i + ",  " + GameUtil.mBitmaps.get(i));
 
             return view;
         }
-
     }
 
     class ViewHolder {
         ImageView imageView;
     }
+
+    ViewTreeObserver.OnGlobalLayoutListener layoutListener;
 
     private void setListener() {
         artworkBtn.setOnClickListener(btnOnClickListener);
@@ -138,38 +144,54 @@ public class PuzzleActivity extends Activity {
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+                ItemBean itemBean = GameUtil.mItemBeans.get(i);
+                if (GameUtil.isMoveable(i)) {
+                    GameUtil.swapItems(itemBean, GameUtil.mBlankBitmapBean);
+                    stepTotal++;
+                    myAdapter.notifyDataSetChanged();
+                    refreshStep(stepTotal);
+                    isDone();
+                }
             }
         });
+        layoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(gridView.getWidth(), gridView.getHeight());
+                imgViewStub.setLayoutParams(layoutParams);
+                gridView.getViewTreeObserver().removeOnGlobalLayoutListener(layoutListener);
+            }
+        };
+        gridView.getViewTreeObserver().addOnGlobalLayoutListener(layoutListener);
+        imgViewStub.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isArtworkVisible) {
+                    showArtWork();
+                }
+            }
+        });
+        //初始化放开事件
+        imgViewStub.setClickable(false);
+    }
+
+    private void isDone() {
+        gridView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (GameUtil.isSuccess()) {
+                    Toast.makeText(PuzzleActivity.this, "恭喜您拼图成功!", Toast.LENGTH_LONG).show();
+                }
+            }
+        }, 50);
     }
 
     private void refreshStep(int t) {
         if (t < 0) {
-            timerView.setText(getString(R.string.puzzle_steper));
+            steperView.setText(getString(R.string.puzzle_steper));
         } else {
-            timerView.setText(t);
+            steperView.setText(t + "");
         }
-    }
-
-    private void refreshTime(int t) {
-        if (t < 0) {
-            timerView.setText(getString(R.string.puzzle_timer));
-        } else {
-            timerView.setText(timeTotal + "");
-        }
-    }
-
-    private void initTimer() {
-        timer = new Timer();
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                Message message = Message.obtain();
-                message.what = 1;
-                timeHandler.sendMessage(message);
-            }
-        };
-        timer.schedule(timerTask, 0, 1000);
     }
 
     private View.OnClickListener btnOnClickListener = new View.OnClickListener() {
@@ -177,14 +199,38 @@ public class PuzzleActivity extends Activity {
         public void onClick(View view) {
             switch (view.getId()) {
                 case R.id.artwork:
+                    showArtWork();
                     break;
                 case R.id.reset:
+                    GameUtil.reset();
+                    resetStatus();
+                    ImageUtil.createInitBitmaps(PuzzleActivity.this, GameUtil.TYPE, mBitmap);
+                    GameUtil.getPuzzleGenerator();
+                    myAdapter.notifyDataSetChanged();
                     break;
                 case R.id.back:
+                    PuzzleActivity.this.finish();
                     break;
             }
         }
     };
+
+    //显示原图
+    private void showArtWork() {
+        if (isArtworkVisible) {
+            artworkInvisibleAnimator.start();
+            imgViewStub.setClickable(false);
+        } else {
+            artworkVisibleAnimator.start();
+            imgViewStub.setClickable(true);
+        }
+        isArtworkVisible = !isArtworkVisible;
+    }
+
+    private void resetStatus() {
+        refreshStep(-1);
+        stepTotal = 0;
+    }
 
     @Override
     protected void onDestroy() {

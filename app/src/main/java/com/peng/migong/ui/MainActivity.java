@@ -2,15 +2,12 @@ package com.peng.migong.ui;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ProviderInfo;
 import android.database.Cursor;
-import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -18,10 +15,13 @@ import android.widget.ImageView;
 
 import com.peng.migong.R;
 import com.peng.migong.constants.ImageType;
+import com.peng.migong.util.GameUtil;
+
 /**
  * 主页面选择图片
+ *
  * @author penglingxiao
- * @date 2017/3/31 
+ * @date 2017/3/31
  */
 public class MainActivity extends Activity {
 
@@ -118,7 +118,7 @@ public class MainActivity extends Activity {
         intent.putExtra("imagePath", imagePath);
         intent.putExtra("imageType", imageType);
         intent.putExtra("type", type);
-        PuzzleActivity.TYPE = type;
+        GameUtil.TYPE = type;
         startActivity(intent);
     }
 }
