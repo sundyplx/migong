@@ -2,6 +2,7 @@ package com.peng.migong.util;
 
 import android.content.Context;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -39,5 +40,16 @@ public class ScreenUtil {
     public static float getDeviceDensity(Context context) {
         DisplayMetrics displayMetrics = getScreenSize(context);
         return displayMetrics.density;
+    }
+
+    /**
+     * dp转px
+     *
+     * @param context context
+     * @param dpValue dp值
+     * @return px值
+     */
+    public static int dp2px(Context context, float dpValue) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpValue, context.getResources().getDisplayMetrics());
     }
 }

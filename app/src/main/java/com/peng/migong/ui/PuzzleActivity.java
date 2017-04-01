@@ -119,9 +119,13 @@ public class PuzzleActivity extends Activity {
                 viewHolder = new ViewHolder();
                 view = LayoutInflater.from(PuzzleActivity.this).inflate(R.layout.puzzle_gridview_item_layout, null);
                 viewHolder.imageView = (ImageView) view.findViewById(R.id.imageView);
+                GridView.LayoutParams layoutParams = new GridView.LayoutParams(viewGroup.getWidth()/GameUtil.TYPE, viewGroup.getHeight()/GameUtil.TYPE);
+                view.setLayoutParams(layoutParams);
                 view.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) view.getTag();
+                GridView.LayoutParams layoutParams = new GridView.LayoutParams(viewGroup.getWidth()/GameUtil.TYPE, viewGroup.getHeight()/GameUtil.TYPE);
+                view.setLayoutParams(layoutParams);
             }
 
             viewHolder.imageView.setImageBitmap(GameUtil.mItemBeans.get(i).getBitmap());
@@ -154,6 +158,7 @@ public class PuzzleActivity extends Activity {
                 }
             }
         });
+        ImageUtil.resizeView(PuzzleActivity.this, gridView, mBitmap);
         layoutListener = new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
