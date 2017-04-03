@@ -186,6 +186,7 @@ public class PuzzleActivity extends Activity {
             public void run() {
                 if (GameUtil.isSuccess()) {
                     Toast.makeText(PuzzleActivity.this, "恭喜您拼图成功!", Toast.LENGTH_LONG).show();
+                    showCompletedImg();
                 }
             }
         }, 50);
@@ -197,6 +198,11 @@ public class PuzzleActivity extends Activity {
         } else {
             steperView.setText(t + "");
         }
+    }
+
+    private void showCompletedImg() {
+        GameUtil.mBlankBitmapBean.setBitmap(GameUtil.mLastBitmap);
+        myAdapter.notifyDataSetChanged();
     }
 
     private View.OnClickListener btnOnClickListener = new View.OnClickListener() {
