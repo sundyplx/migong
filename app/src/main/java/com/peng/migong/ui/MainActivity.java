@@ -98,8 +98,8 @@ public class MainActivity extends Activity {
                 case R.id.model_3:
                     type =5;
                     break;
-
             }
+            popupWindow.dismiss();
         }
     };
 
