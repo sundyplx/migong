@@ -12,6 +12,8 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.peng.migong.R;
 import com.peng.migong.constants.ImageType;
@@ -29,7 +31,11 @@ public class MainActivity extends Activity {
     private static final String IMAGE_TYPE = "image/*";
 
     private GridView gridView;
+    private TextView modelView;
+    private PopupWindow popupWindow;
     private int[] resIds = {R.drawable.default_1, R.drawable.default_2, R.drawable.default_3, R.drawable.default_4, R.drawable.default_more};
+    int type = 3;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +43,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         gridView = (GridView) findViewById(R.id.gridview);
         gridView.setAdapter(new MyAdapter());
+        modelView = (TextView) findViewById(R.id.modelType);
         setListener();
     }
 
@@ -52,6 +59,12 @@ public class MainActivity extends Activity {
                 }
             }
         });
+        modelView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showModelWindow();
+            }
+        });
     }
 
     private void showCustomDrawableDialog() {
@@ -59,6 +72,36 @@ public class MainActivity extends Activity {
         intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, IMAGE_TYPE);
         startActivityForResult(intent, RESULT_IMAGE);
     }
+
+    private void showModelWindow() {
+        popupWindow = new PopupWindow(this);
+        View view = LayoutInflater.from(this).inflate(R.layout.model_select_layout, null);
+        view.findViewById(R.id.model_1).setOnClickListener(modelClickListener);
+        view.findViewById(R.id.model_2).setOnClickListener(modelClickListener);
+        view.findViewById(R.id.model_3).setOnClickListener(modelClickListener);
+        popupWindow.setContentView(view);
+        popupWindow.setClippingEnabled(true);
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.showAsDropDown(modelView, 0, 0);
+    }
+
+    View.OnClickListener modelClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.model_1:
+                    type =3;
+                    break;
+                case R.id.model_2:
+                    type =4;
+                    break;
+                case R.id.model_3:
+                    type =5;
+                    break;
+
+            }
+        }
+    };
 
     private class MyAdapter extends BaseAdapter {
 
@@ -113,7 +156,7 @@ public class MainActivity extends Activity {
     }
 
     private void jumpPuzzleActivity(String imagePath, String imageType) {
-        int type = 3;
+
         Intent intent = new Intent(this, PuzzleActivity.class);
         intent.putExtra("imagePath", imagePath);
         intent.putExtra("imageType", imageType);
