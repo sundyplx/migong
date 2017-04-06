@@ -3,6 +3,7 @@ package com.peng.migong.ui;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.peng.migong.R;
 import com.peng.migong.constants.ImageType;
@@ -74,14 +76,16 @@ public class MainActivity extends Activity {
     }
 
     private void showModelWindow() {
-        popupWindow = new PopupWindow(this);
         View view = LayoutInflater.from(this).inflate(R.layout.model_select_layout, null);
         view.findViewById(R.id.model_1).setOnClickListener(modelClickListener);
         view.findViewById(R.id.model_2).setOnClickListener(modelClickListener);
         view.findViewById(R.id.model_3).setOnClickListener(modelClickListener);
-        popupWindow.setContentView(view);
+        popupWindow = new PopupWindow(view, 300, ViewGroup.LayoutParams.WRAP_CONTENT, false);
         popupWindow.setClippingEnabled(true);
         popupWindow.setOutsideTouchable(true);
+        // 实例化一个ColorDrawable颜色为半透明
+        ColorDrawable dw = new ColorDrawable(0000000000);
+        popupWindow.setBackgroundDrawable(dw);
         popupWindow.showAsDropDown(modelView, 0, 0);
     }
 
@@ -99,6 +103,7 @@ public class MainActivity extends Activity {
                     type =5;
                     break;
             }
+            Toast.makeText(MainActivity.this, type + "维矩阵", Toast.LENGTH_LONG).show();
             popupWindow.dismiss();
         }
     };
